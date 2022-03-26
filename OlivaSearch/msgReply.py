@@ -52,7 +52,10 @@ def parse_one_page(text, option):
     content = html.xpath(XPATH_DICT[option])
     string = ''
     for item in content:
-        string += item.xpath('string(.)').replace('\n', '')
+        if isinstance(item, str):
+            string += item
+        else:
+            string += item.xpath('string(.)').replace('\n', '')
     return string
 
 

@@ -12,7 +12,7 @@ HELP_DOC = '''
 '''
 
 XPATH_DICT = {
-    'baidu': '/html/body/div[3]/div[2]/div/div[1]/div[4]/div',
+    'baidu': '//meta[@property="og:description"]/@content',
     'moe': '//*[@id="mw-content-text"]/div/p',
     'touhou': '//*[@id="mw-content-text"]/div/div[1]/p[position()<3]',
     'wiki': '//*[@id="mw-content-text"]/div/p'
