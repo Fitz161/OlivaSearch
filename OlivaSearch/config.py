@@ -22,7 +22,8 @@ SERACH_BASE_URL = {
     'baidu': 'https://baike.baidu.com/item/',
     'moe': 'https://zh.moegirl.org/',
     'touhou': 'https://thwiki.cc/',
-    'wiki': 'https://zh.wikipedia.org/wiki/'}
+    'wiki': 'https://zh.wikipedia.org/wiki/',
+    'abbrev': 'https://lab.magiconch.com/api/nbnhhsh/guess'}
 
 TYPE_TRANS = {
     1: 'baidu',

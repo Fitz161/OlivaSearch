@@ -27,12 +27,17 @@ def help_doc(plugin_event, _):
     return HELP_DOC
 
 
-def get_one_page(url, type='text'):
+def get_one_page(url, type='text', req_type='get', data=None):
     """ 使用get请求访问指定url，并根据type以指定形式返回网页内容 """
+    if data is None:
+        data = dict()
     headers = {
         "User-Agent": USER_AGENT}
     try:
-        response = requests.get(url, headers=headers, timeout=8)
+        if req_type == 'get':
+            response = requests.get(url, headers=headers, timeout=8)
+        else:
+            response = requests.post(url, data, headers=headers, timeout=8)
         if response.status_code == 200 or response.status_code == 304:
             if type == 'text':
                 return response.text
@@ -82,6 +87,32 @@ def baidu(plugin_event, _):
     return search(url, 'baidu', item)
 
 
+@add_command('缩写')
+def abbreviation(plugin_event, _):
+    message = plugin_event
+    if message[2] != ' ': return  # 第三个字符必须是空格
+    item = message[2:].strip()
+    if not item.isascii():
+        return "请使用拼音首字母和数字搜索释义"
+    url = SERACH_BASE_URL['abbrev']
+    result = get_one_page(url, 'json', 'post', {
+        'text': item
+    })
+    if result == 'failed':
+        return "搜索 %s 失败\n该条目不存在" % item
+    elif result == 'time_out':
+        return "搜索 %s 超时，请重试" % item
+    abbrev_list = result[0].get('trans')
+    if not abbrev_list:
+        return "搜索 %s 失败\n该条目不存在" % item
+    return  "搜索 %s :\n" % item + '  '.join(abbrev_list)
+
+
+@add_command('释义')
+def explain(plugin_event, _):
+    return abbreviation(plugin_event, _)
+
+
 @add_command('搜索')
 def search_item(plugin_event, _):
     message = plugin_event.data.message
@@ -89,7 +120,7 @@ def search_item(plugin_event, _):
         search_type = TYPE_TRANS.get(int(message[2]))
     else:
         if message[2:].strip() in command_dict.keys() and \
-                message[2:].strip() not in ['搜索', '百度']:
+                message[2:].strip() not in ['搜索', '百度', '释义', '缩写']:
             return command_dict.get(message[2:].strip())(plugin_event, _)
         return
     keyword = message[3:].strip()
@@ -111,7 +142,7 @@ def unity_init(_, Proc):
 
 def unity_reply(plugin_event, Proc):
     message = plugin_event.data.message
-    if message[:2] not in ['搜索', '百度'] or len(message) < 3: return
+    if message[:2] not in ['搜索', '百度', '释义', '缩写'] or len(message) < 3: return
     reply_msg = command_dict.get(message[:2])(plugin_event, Proc)
     if not reply_msg: return
     plugin_event.reply(reply_msg[:MAX_SEND_LENGTH])
